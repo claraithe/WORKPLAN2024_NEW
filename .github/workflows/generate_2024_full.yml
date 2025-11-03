@@ -1,7 +1,7 @@
 name: Generate 2024 Excel and CSV from 2023 templates
 
 on:
-  workflow_dispatch:  # esecuzione manuale da tab "Actions"
+  workflow_dispatch:
 
 jobs:
   build:
@@ -23,6 +23,7 @@ jobs:
 
     - name: Generate 2024 Excel files from 2023 templates
       run: |
+        python <<'PYCODE'
         import os
         import pandas as pd
         import shutil
@@ -35,15 +36,18 @@ jobs:
 
         os.makedirs(output_dir, exist_ok=True)
 
-        # ---- Step 1: Replica .xlsx examples ----
+        print(f"🔍 Base directory: {base_dir}")
+        print("📂 Copying Excel templates...")
+
         for file in os.listdir(examples_split):
             if file.endswith(".xlsx"):
                 src = os.path.join(examples_split, file)
                 new_name = file.replace("2023", "2024")
                 dest = os.path.join(output_dir, new_name)
                 shutil.copy2(src, dest)
+                print(f"✅ Copied: {file} → {new_name}")
 
-        # ---- Step 2: Replica analysis CSV ----
+        print("📊 Copying CSV analysis files...")
         for file in os.listdir(examples_analysis):
             if file.endswith(".csv"):
                 src = os.path.join(examples_analysis, file)
@@ -51,6 +55,8 @@ jobs:
                 dest = os.path.join(output_dir, new_name)
                 df = pd.read_csv(src)
                 df.to_csv(dest, index=False)
+                print(f"✅ CSV replicated: {file} → {new_name}")
 
-        print("✅ Generated 2024 files in /output_2024/")
+        print("🎯 All 2024 files generated successfully in /output_2024/")
+        PYCODE
 
