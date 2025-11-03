@@ -3,6 +3,9 @@ name: Generate 2024 Excel and CSV from 2023 templates
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write   # <-- permette di fare push al repo
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -64,6 +67,8 @@ jobs:
       run: |
         git config user.name "GitHub Action"
         git config user.email "actions@github.com"
+        git fetch origin main
+        git checkout main
         git add output_2024/*
-        git commit -m "Add generated 2024 Excel and CSV files [auto]"
-        git push
+        git commit -m "Add generated 2024 Excel and CSV files [auto]" || echo "No changes to commit"
+        git push origin main
