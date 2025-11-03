@@ -10,6 +10,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -21,7 +23,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pandas openpyxl
 
-    - name: Generate 2024 Excel files from 2023 templates
+    - name: Generate 2024 Excel and CSV files
       run: |
         python <<'PYCODE'
         import os
@@ -36,9 +38,7 @@ jobs:
 
         os.makedirs(output_dir, exist_ok=True)
 
-        print(f"🔍 Base directory: {base_dir}")
         print("📂 Copying Excel templates...")
-
         for file in os.listdir(examples_split):
             if file.endswith(".xlsx"):
                 src = os.path.join(examples_split, file)
@@ -60,3 +60,10 @@ jobs:
         print("🎯 All 2024 files generated successfully in /output_2024/")
         PYCODE
 
+    - name: Commit and push generated files
+      run: |
+        git config user.name "GitHub Action"
+        git config user.email "actions@github.com"
+        git add output_2024/*
+        git commit -m "Add generated 2024 Excel and CSV files [auto]"
+        git push
