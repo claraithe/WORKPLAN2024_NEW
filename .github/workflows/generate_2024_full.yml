@@ -1,0 +1,56 @@
+name: Generate 2024 Excel and CSV from 2023 templates
+
+on:
+  workflow_dispatch:  # esecuzione manuale da tab "Actions"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas openpyxl
+
+    - name: Generate 2024 Excel files from 2023 templates
+      run: |
+        import os
+        import pandas as pd
+        import shutil
+
+        base_dir = os.getcwd()
+        data_dir = os.path.join(base_dir, "data_2024")
+        examples_split = os.path.join(base_dir, "examples_2023_split")
+        examples_analysis = os.path.join(base_dir, "examples_2023_analysis")
+        output_dir = os.path.join(base_dir, "output_2024")
+
+        os.makedirs(output_dir, exist_ok=True)
+
+        # ---- Step 1: Replica .xlsx examples ----
+        for file in os.listdir(examples_split):
+            if file.endswith(".xlsx"):
+                src = os.path.join(examples_split, file)
+                new_name = file.replace("2023", "2024")
+                dest = os.path.join(output_dir, new_name)
+                shutil.copy2(src, dest)
+
+        # ---- Step 2: Replica analysis CSV ----
+        for file in os.listdir(examples_analysis):
+            if file.endswith(".csv"):
+                src = os.path.join(examples_analysis, file)
+                new_name = file.replace("2023", "2024")
+                dest = os.path.join(output_dir, new_name)
+                df = pd.read_csv(src)
+                df.to_csv(dest, index=False)
+
+        print("✅ Generated 2024 files in /output_2024/")
+
